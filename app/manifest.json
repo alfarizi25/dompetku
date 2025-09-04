@@ -1,0 +1,21 @@
+{
+  "name": "DompetKu - Financial Planner",
+  "short_name": "DompetKu",
+  "description": "Aplikasi perencanaan keuangan pribadi untuk mengelola transaksi, hutang, dan tabungan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/icon-192.jpg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
