@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "DompetKu - Aplikasi Pencatat Keuangan",
+  title: "DompetKu - Atur Duit Tanpa Drama",
   description: "Atur Duit Tanpa Drama",
   icons: {
     icon: "/favicon.ico",
