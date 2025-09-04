@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "DompetKu - Aplikasi Pencatat Keuangan",
-  description: "Aplikasi pencatat keuangan, hutang, dan perencana tabungan yang mudah digunakan",
+  description: "Atur Duit Tanpa Drama",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",

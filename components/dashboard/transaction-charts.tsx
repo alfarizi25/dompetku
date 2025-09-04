@@ -82,37 +82,37 @@ export function TransactionCharts({ monthlyData, categoryData, stats }: Transact
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Monthly Trend Chart */}
       <Card className="glass-card animate-slide-up">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
             Tren Bulanan
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="p-4 sm:p-6">
+          <ResponsiveContainer width="100%" height={250}>
             <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-              <YAxis stroke="#6B7280" fontSize={12} tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`} />
+              <XAxis dataKey="month" stroke="#6B7280" fontSize={10} angle={-45} textAnchor="end" height={60} />
+              <YAxis stroke="#6B7280" fontSize={10} tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`} />
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
                 dataKey="income"
                 stroke="#10B981"
-                strokeWidth={3}
-                dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2 }}
+                strokeWidth={2}
+                dot={{ fill: "#10B981", strokeWidth: 2, r: 3 }}
+                activeDot={{ r: 5, stroke: "#10B981", strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
                 dataKey="expense"
                 stroke="#EF4444"
-                strokeWidth={3}
-                dot={{ fill: "#EF4444", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "#EF4444", strokeWidth: 2 }}
+                strokeWidth={2}
+                dot={{ fill: "#EF4444", strokeWidth: 2, r: 3 }}
+                activeDot={{ r: 5, stroke: "#EF4444", strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
@@ -120,11 +120,11 @@ export function TransactionCharts({ monthlyData, categoryData, stats }: Transact
                 stroke="#3B82F6"
                 strokeWidth={2}
                 strokeDasharray="5 5"
-                dot={{ fill: "#3B82F6", strokeWidth: 2, r: 3 }}
+                dot={{ fill: "#3B82F6", strokeWidth: 2, r: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
-          <div className="flex justify-center gap-6 mt-4 text-sm">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <span>Pemasukan</span>
@@ -144,20 +144,20 @@ export function TransactionCharts({ monthlyData, categoryData, stats }: Transact
       {/* Income vs Expenses Pie Chart */}
       <Card className="glass-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <PieChartIcon className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <PieChartIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             Perbandingan Bulan Ini
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="p-4 sm:p-6">
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={incomeExpenseData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={50}
+                outerRadius={80}
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -177,13 +177,13 @@ export function TransactionCharts({ monthlyData, categoryData, stats }: Transact
               />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex justify-center gap-6 mt-4 text-sm">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-6 mt-4 text-xs sm:text-sm">
+            <div className="flex items-center justify-center gap-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <span>Pemasukan</span>
               <span className="font-medium">Rp {totalIncome.toLocaleString("id-ID")}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <span>Pengeluaran</span>
               <span className="font-medium">Rp {totalExpenses.toLocaleString("id-ID")}</span>
@@ -195,17 +195,25 @@ export function TransactionCharts({ monthlyData, categoryData, stats }: Transact
       {/* Category Breakdown Chart */}
       <Card className="glass-card animate-slide-up lg:col-span-2" style={{ animationDelay: "0.2s" }}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
             Pengeluaran per Kategori
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <CardContent className="p-4 sm:p-6">
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={categoryData} margin={{ top: 20, right: 10, left: 10, bottom: 60 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="category" stroke="#6B7280" fontSize={12} angle={-45} textAnchor="end" height={80} />
-              <YAxis stroke="#6B7280" fontSize={12} tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`} />
+              <XAxis
+                dataKey="category"
+                stroke="#6B7280"
+                fontSize={10}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                interval={0}
+              />
+              <YAxis stroke="#6B7280" fontSize={10} tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`} />
               <Tooltip content={<CategoryTooltip />} />
               <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
                 {categoryData.map((entry, index) => (

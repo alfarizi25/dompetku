@@ -4,8 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { AlertTriangle, CheckCircle, Clock, MoreHorizontal, Trash2, CreditCard } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { AlertTriangle, CheckCircle, Clock, Trash2, CreditCard } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { Debt } from "@/lib/db"
 
@@ -114,62 +113,50 @@ export function DebtsList({ debts }: DebtsListProps) {
                 debt.is_paid ? "opacity-75" : ""
               }`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="mt-1">{getStatusIcon(debt)}</div>
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className="mt-1 flex-shrink-0">{getStatusIcon(debt)}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
                       <h3 className="font-medium text-gray-900 truncate">{debt.creditor_name}</h3>
                       {getStatusBadge(debt)}
                     </div>
-                    {debt.description && <p className="text-sm text-gray-600 mb-2">{debt.description}</p>}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-500">
+                    {debt.description && <p className="text-sm text-gray-600 mb-2 break-words">{debt.description}</p>}
+                    <div className="flex flex-col gap-1 text-sm text-gray-500">
                       <span>
                         Sisa:{" "}
                         <span className="font-medium">Rp {Number(debt.remaining_amount).toLocaleString("id-ID")}</span>
                       </span>
-                      <span className="hidden sm:inline">•</span>
                       <span>
                         Total: <span className="font-medium">Rp {Number(debt.amount).toLocaleString("id-ID")}</span>
                       </span>
-                      {debt.due_date && (
-                        <>
-                          <span className="hidden sm:inline">•</span>
-                          <span>Jatuh tempo: {new Date(debt.due_date).toLocaleDateString("id-ID")}</span>
-                        </>
-                      )}
+                      {debt.due_date && <span>Jatuh tempo: {new Date(debt.due_date).toLocaleDateString("id-ID")}</span>}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex items-center gap-2 justify-end sm:ml-4">
                   {!debt.is_paid && (
                     <Button
                       size="sm"
                       onClick={() => handleMarkAsPaid(debt.id)}
                       disabled={isLoading === debt.id}
-                      className="glass-strong text-white hover:bg-white/20"
+                      className="glass-strong text-white hover:bg-white/20 text-xs sm:text-sm px-2 sm:px-3"
                     >
                       {isLoading === debt.id ? "..." : "Tandai Lunas"}
                     </Button>
                   )}
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="glass-card border-white/20">
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(debt.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Hapus
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(debt.id)}
+                    disabled={isLoading === debt.id}
+                    className="h-8 w-8 p-0 flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    title="Hapus hutang"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>

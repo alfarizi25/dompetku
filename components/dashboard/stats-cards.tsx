@@ -77,7 +77,7 @@ export function StatsCards({ stats, debts, savings }: StatsCardsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {cards.map((card, index) => {
         const Icon = card.icon
         return (
@@ -86,15 +86,17 @@ export function StatsCards({ stats, debts, savings }: StatsCardsProps) {
             className="glass-card hover:glass-strong transition-all duration-300 animate-slide-up"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600 mb-1">{card.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mb-1">{card.value}</p>
-                  <p className="text-xs text-gray-500">{card.count}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-600 mb-1 truncate">{card.title}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 truncate">{card.value}</p>
+                  <p className="text-xs text-gray-500 truncate">{card.count}</p>
                 </div>
-                <div className={`w-12 h-12 bg-gradient-to-r ${card.color} rounded-lg flex items-center justify-center`}>
-                  <Icon className="h-6 w-6 text-white" />
+                <div
+                  className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r ${card.color} rounded-lg flex items-center justify-center flex-shrink-0 ml-3`}
+                >
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
               </div>
             </CardContent>

@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ArrowRight, Shield, TrendingUp, PiggyBank, CreditCard, CheckCircle, Star, Users } from "lucide-react"
+import { ArrowRight, Shield, TrendingUp, PiggyBank, CreditCard, Star, Users } from "lucide-react"
 
 export default function HomePage() {
   return (
@@ -11,79 +11,90 @@ export default function HomePage() {
 
         {/* Navigation */}
         <nav className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-  <div className="flex items-center justify-between">
-    {/* Logo */}
-    <div className="flex items-center space-x-2">
-      <img src="/favicon.ico" alt="DompetKu" className="w-10 h-10" />
-      <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-        DompetKu
-      </span>
-    </div>
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center space-x-2">
+              <img src="/favicon.ico" alt="DompetKu" className="w-8 h-8 sm:w-10 sm:h-10" />
+              <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                DompetKu
+              </span>
+            </div>
 
-    {/* Menu */}
-    <div className="hidden md:flex items-center space-x-8">
-      <Link
-        href="#features"
-        className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium transition-all duration-300 hover:opacity-80"
-      >
-        Fitur
-      </Link>
-      <Link
-        href="#testimonials"
-        className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium transition-all duration-300 hover:opacity-80"
-      >
-        Testimoni
-      </Link>
-      <Link href="/login">
-        <Button
-          size="sm"
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300"
-        >
-          Masuk
-        </Button>
-      </Link>
-    </div>
-  </div>
-</nav>
+            {/* Menu */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link
+                href="#features"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium transition-all duration-300 hover:opacity-80"
+              >
+                Fitur
+              </Link>
+              <Link
+                href="#testimonials"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium transition-all duration-300 hover:opacity-80"
+              >
+                Testimoni
+              </Link>
+              <Link href="/login">
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300"
+                >
+                  Masuk
+                </Button>
+              </Link>
+            </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+            <div className="md:hidden">
+              <Link href="/login">
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300"
+                >
+                  Masuk
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </nav>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-16">
           <div className="text-center animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
-            Atur Finansial, {" "}
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
+            Atur Duit {" "}
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Hidup Lebih Tenang 
+                Tanpa Drama
               </span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto text-pretty">
-            DompetKu bikin catat duit harian sampai rencana tabungan jadi gampang. Bebas pusing, tinggal catat, beres!
+            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto text-pretty">
+              DompetKu bikin catat duit harian sampai rencana tabungan jadi gampang. Bebas pusing, tinggal catat, beres!
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Link href="/register">
-              <Button
-  size="lg"
-  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 animate-scale-in px-8 py-3"
->
-  Mulai Sekarang Gratis
-  <ArrowRight className="ml-2 h-5 w-5" />
-</Button>
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 animate-scale-in px-6 sm:px-8 py-3"
+                >
+                  Mulai Sekarang Gratis
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
               </Link>
               <Link href="/login">
-              <Button
-  variant="outline"
-  size="lg"
-  className="relative transition-all duration-300 px-8 py-3 bg-transparent font-semibold
-             bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text 
-             before:absolute before:inset-0 before:rounded-lg before:p-[2px] before:bg-gradient-to-r before:from-blue-600 before:to-indigo-600 before:content-[''] before:-z-10
-             hover:bg-blue-50/30"
->
-  Masuk ke Akun
-</Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto relative transition-all duration-300 px-6 sm:px-8 py-3 bg-transparent font-semibold
+                             bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text 
+                             before:absolute before:inset-0 before:rounded-lg before:p-[2px] before:bg-gradient-to-r before:from-blue-600 before:to-indigo-600 before:content-[''] before:-z-10
+                             hover:bg-blue-50/30"
+                >
+                  Masuk ke Akun
+                </Button>
               </Link>
             </div>
 
             {/* Trust indicators */}
-            <div className="flex items-center justify-center space-x-8 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
                 <Shield className="h-4 w-4 text-primary" />
                 <span>100% Aman</span>
@@ -104,20 +115,22 @@ export default function HomePage() {
       {/* Features Section */}
       <div id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Semua Fitur yang Kamu Butuhin</h2>
+          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Semua Fitur yang Kamu Butuhin
+          </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Dari nyatet pengeluaran sampai nabung buat masa depan—semua ada di DompetKu, gampang banget dipakai.
+            Dari nyatet pengeluaran sampai nabung buat masa depan—semua ada di DompetKu, gampang banget dipakai.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-card p-6 hover:shadow-lg transition-all duration-300 animate-slide-up border-border">
             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mb-4">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <h3 className="text-lg font-semibold text-card-foreground mb-2">Catat Pengeluaran Harian</h3>
             <p className="text-muted-foreground text-sm">
-            Nulis duit masuk & keluar jadi simpel. Ada kategorinya, ada laporannya, semua rapi.
+              Nulis duit masuk & keluar jadi simpel. Ada kategorinya, ada laporannya, semua rapi.
             </p>
           </Card>
 
@@ -130,7 +143,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-lg font-semibold text-card-foreground mb-2">Ingetin Hutang Otomatis</h3>
             <p className="text-muted-foreground text-sm">
-            Catat siapa yang ngutang, berapa jumlahnya, dan DompetKu yang bakal ingetin jatuh temponya.
+              Catat siapa yang ngutang, berapa jumlahnya, dan DompetKu yang bakal ingetin jatuh temponya.
             </p>
           </Card>
 
@@ -143,7 +156,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-lg font-semibold text-card-foreground mb-2">Nabung Jadi Lebih Seru</h3>
             <p className="text-muted-foreground text-sm">
-            Bikin target, pantau progress, lihat hasilnya. Nabung makin gampang dan kerasa nyata.
+              Bikin target, pantau progress, lihat hasilnya. Nabung makin gampang dan kerasa nyata.
             </p>
           </Card>
 
@@ -156,7 +169,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-lg font-semibold text-card-foreground mb-2">Data Aman, Hidup Tenang</h3>
             <p className="text-muted-foreground text-sm">
-            Privasi dijaga, data terenkripsi, auto-backup ke cloud. Jadi nggak usah was-was.
+              Privasi dijaga, data terenkripsi, auto-backup ke cloud. Jadi nggak usah was-was.
             </p>
           </Card>
         </div>
@@ -165,13 +178,15 @@ export default function HomePage() {
       {/* Testimonials Section */}
       <div id="testimonials" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Kata Mereka yang Udah Coba</h2>
+          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Kata Mereka yang Udah Coba
+          </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          DompetKu udah bantu ribuan orang nyatet duit lebih gampang dan rapi.
+            DompetKu udah bantu ribuan orang nyatet duit lebih gampang dan rapi.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card className="bg-card p-6 border-border">
             <div className="flex items-center space-x-1 mb-4">
               {[...Array(5)].map((_, i) => (
@@ -179,7 +194,8 @@ export default function HomePage() {
               ))}
             </div>
             <p className="text-card-foreground mb-4">
-              "DompetKu ngebantu banget buat ngatur gaji bulanan. Aplikasinya gampang dipakai, fiturnya jelas, export ke Excel juga praktis banget!"
+              "DompetKu ngebantu banget buat ngatur gaji bulanan. Aplikasinya gampang dipakai, fiturnya jelas, export ke
+              Excel juga praktis banget!"
             </p>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
@@ -199,7 +215,8 @@ export default function HomePage() {
               ))}
             </div>
             <p className="text-card-foreground mb-4">
-              "Fitur catat hutang di DompetKu bikin aku bisa disiplin bayar cicilan. Alhamdulillah, semua lunas dalam 6 bulan 🙏"
+              "Fitur catat hutang di DompetKu bikin aku bisa disiplin bayar cicilan. Alhamdulillah, semua lunas dalam 6
+              bulan 🙏"
             </p>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
@@ -219,7 +236,8 @@ export default function HomePage() {
               ))}
             </div>
             <p className="text-card-foreground mb-4">
-              "Sebagai freelancer yang punya banyak klien, DompetKu bener-bener nolong. Income tiap project bisa ketrek jelas, laporan bulanan juga detail banget!"
+              "Sebagai freelancer yang punya banyak klien, DompetKu bener-bener nolong. Income tiap project bisa ketrek
+              jelas, laporan bulanan juga detail banget!"
             </p>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
@@ -235,17 +253,17 @@ export default function HomePage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-16">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white mb-4">Atur Duit Tanpa Drama</h2>
-          <p className="text-xl text-white/90 mb-8">
-          DompetKu udah dipakai ribuan orang. Sekarang giliran kamu coba sendiri.
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Atur Duit Tanpa Drama</h2>
+          <p className="text-lg sm:text-xl text-white/90 mb-8">
+            DompetKu udah dipakai ribuan orang. Sekarang giliran kamu coba sendiri.
           </p>
           <Link href="/register">
             <Button
               size="lg"
               variant="secondary"
-              className="bg-white text-primary hover:bg-white/90 transition-all duration-300 px-8 py-3"
+              className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 transition-all duration-300 px-6 sm:px-8 py-3"
             >
               Daftar Sekarang - Gratis!
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -257,14 +275,16 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-card border-t border-border py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <img src="/favicon.ico" alt="DompetKu" className="w-8 h-8" />
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">DompetKu</span>
+                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  DompetKu
+                </span>
               </div>
               <p className="text-muted-foreground mb-4 max-w-md">
-              Catat pengeluaran, kelola hutang, sampai nabung jadi gampang bareng DompetKu.
+                Catat pengeluaran, kelola hutang, sampai nabung jadi gampang bareng DompetKu.
               </p>
               <p className="text-sm text-muted-foreground">
                 &copy; 2024 DompetKu. Dibuat dengan ❤️ supaya kamu lebih gampang atur duit.

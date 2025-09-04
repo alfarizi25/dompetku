@@ -86,7 +86,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                   )}
                 >
                   <Icon className="h-4 w-4" />
-                  <span className="hidden lg:inline">{item.name}</span>
+                  <span className="hidden lg:inline text-sm xl:text-base">{item.name}</span>
                 </Link>
               )
             })}
@@ -155,7 +155,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-white/20 bg-white/5 backdrop-blur-sm mobile-menu-enter">
-            <nav className="space-y-1">
+            <nav className="space-y-1 max-h-96 overflow-y-auto">
               {navigation.map((item, index) => {
                 const Icon = item.icon
                 const active = isActive(item.href)
@@ -172,19 +172,22 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                     style={{ animationDelay: `${index * 0.1}s` }}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Icon className="h-5 w-5" />
-                    {item.name}
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">{item.name}</span>
                   </Link>
                 )
               })}
               <Button
-                onClick={handleLogout}
+                onClick={() => {
+                  handleLogout()
+                  setIsMobileMenuOpen(false)
+                }}
                 variant="ghost"
                 className="w-full justify-start gap-3 px-3 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 animate-slide-in-left"
                 style={{ animationDelay: `${navigation.length * 0.1}s` }}
               >
-                <LogOut className="h-5 w-5" />
-                Keluar
+                <LogOut className="h-5 w-5 flex-shrink-0" />
+                <span className="truncate">Keluar</span>
               </Button>
             </nav>
           </div>

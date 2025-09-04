@@ -4,8 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Trash2, TrendingUp } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ArrowUpRight, ArrowDownRight, Trash2, TrendingUp } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { Transaction } from "@/lib/db"
 
@@ -69,11 +68,11 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
           {transactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="flex items-center justify-between p-4 rounded-lg glass hover:glass-strong transition-all duration-200"
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg glass hover:glass-strong transition-all duration-200 gap-3 sm:gap-0"
             >
-              <div className="flex items-center gap-3 flex-1">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                     transaction.type === "income" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
                   }`}
                 >
@@ -84,9 +83,9 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
                     <h3 className="font-medium text-gray-900 truncate">{transaction.description}</h3>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs w-fit">
                       {transaction.category}
                     </Badge>
                   </div>
@@ -94,29 +93,25 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className={`font-bold ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
+              <div className="flex items-center justify-between sm:justify-end gap-3">
+                <div className="text-left sm:text-right">
+                  <p
+                    className={`font-bold text-sm sm:text-base ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
+                  >
                     {transaction.type === "income" ? "+" : "-"}Rp {Number(transaction.amount).toLocaleString("id-ID")}
                   </p>
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="glass-card border-white/20">
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(transaction.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Hapus
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(transaction.id)}
+                  disabled={isLoading === transaction.id}
+                  className="h-8 w-8 p-0 flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  title="Hapus transaksi"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ))}
