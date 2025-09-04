@@ -77,13 +77,13 @@ export function StatsCards({ stats, debts, savings }: StatsCardsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
       {cards.map((card, index) => {
         const Icon = card.icon
         return (
           <Card
             key={card.title}
-            className="glass-card hover:glass-strong transition-all duration-300 animate-slide-up"
+            className="glass-card hover:glass-strong transition-all duration-300 animate-slide-up w-full"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             <CardContent className="p-4 sm:p-6">
