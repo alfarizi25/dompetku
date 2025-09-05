@@ -3,6 +3,29 @@ import { getCurrentUser } from "@/lib/auth"
 import { sql } from "@/lib/db"
 import * as XLSX from "xlsx"
 
+// Helper function to apply styling to a range of cells
+function applyStyle(worksheet: XLSX.WorkSheet, range: XLSX.Range, style: any) {
+  for (let R = range.s.r; R <= range.e.r; ++R) {
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cellAddress = XLSX.utils.encode_cell({ c: C, r: R })
+      if (!worksheet[cellAddress]) worksheet[cellAddress] = { t: "s", v: "" }
+      worksheet[cellAddress].s = style
+    }
+  }
+}
+
+// Helper to merge and style cells for titles
+function mergeAndStyle(ws: XLSX.WorkSheet, row: number, colStart: number, colEnd: number, text: string, style: any) {
+    ws["!merges"] = ws["!merges"] || [];
+    ws["!merges"].push({ s: { r: row, c: colStart }, e: { r: row, c: colEnd } });
+    const cellAddress = XLSX.utils.encode_cell({c: colStart, r: row});
+    // Ensure the cell exists before styling
+    if(!ws[cellAddress]) ws[cellAddress] = { t: 's', v: text };
+    else ws[cellAddress].v = text;
+    ws[cellAddress].s = style;
+}
+
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()
@@ -15,408 +38,195 @@ export async function GET(request: NextRequest) {
     const includeTransactions = searchParams.get("transactions") === "true"
     const includeDebts = searchParams.get("debts") === "true"
     const includeSavings = searchParams.get("savings") === "true"
-    const startDate = searchParams.get("startDate")
-    const endDate = searchParams.get("endDate")
+    const startDate = searchParams.get("startDate") || null
+    const endDate = searchParams.get("endDate") || null
 
     const workbook = XLSX.utils.book_new()
 
-    const formatCurrency = (amount: number) => {
-      return new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(amount)
+    const formatCurrency = (amount: number) =>
+      new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount)
+
+    const formatDate = (dateStr: string | null) =>
+      dateStr ? new Date(dateStr).toLocaleDateString("id-ID") : "-"
+    
+    // --- Build Base Queries ---
+    let transactionQuery = sql`SELECT date, type, amount, category, description FROM transactions WHERE user_id = ${user.id}`
+    let debtQuery = sql`SELECT creditor_name, amount, remaining_amount, is_paid, due_date, description FROM debts WHERE user_id = ${user.id}`
+    let savingsQuery = sql`SELECT goal_name, target_amount, current_amount, target_date, description FROM savings_goals WHERE user_id = ${user.id}`
+
+    if (startDate && endDate) {
+      transactionQuery = sql`${transactionQuery} AND date BETWEEN ${startDate} AND ${endDate}`
+    } else if (startDate) {
+      transactionQuery = sql`${transactionQuery} AND date >= ${startDate}`
+    } else if (endDate) {
+      transactionQuery = sql`${transactionQuery} AND date <= ${endDate}`
     }
+    
+    // --- Fetch All Data ---
+    const allTransactions = await transactionQuery
+    const allDebts = await debtQuery
+    const allSavings = await savingsQuery
 
-    const applyHeaderStyle = (worksheet: XLSX.WorkSheet, range: string) => {
-      if (!worksheet["!merges"]) worksheet["!merges"] = []
-      if (!worksheet["!cols"]) worksheet["!cols"] = []
+    // --- Styling Constants ---
+    const titleStyle = { font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "2E5B9A" } }, alignment: { horizontal: "center" } };
+    const sectionTitleStyle = { font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "4F81BD" } } };
+    const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: "DCE6F1" } } };
+    const totalStyle = { font: { bold: true }, alignment: { horizontal: "right" } };
+    const currencyFormat = '_("Rp"* #,##0_);_("Rp"* (#,##0);_("Rp"* "-"??_);_(@_)';
 
-      // Apply header formatting
-      const headerRange = XLSX.utils.decode_range(range)
-      for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col })
-        if (!worksheet[cellAddress]) continue
-
-        worksheet[cellAddress].s = {
-          font: { bold: true, color: { rgb: "FFFFFF" } },
-          fill: { fgColor: { rgb: "4F46E5" } },
-          alignment: { horizontal: "center", vertical: "center" },
-          border: {
-            top: { style: "thin", color: { rgb: "000000" } },
-            bottom: { style: "thin", color: { rgb: "000000" } },
-            left: { style: "thin", color: { rgb: "000000" } },
-            right: { style: "thin", color: { rgb: "000000" } },
-          },
-        }
-      }
-    }
-
-    // Export Transactions
-    if (includeTransactions) {
-      let transactionQuery = `
-        SELECT 
-          date as "Tanggal",
-          CASE 
-            WHEN type = 'income' THEN 'Pemasukan'
-            WHEN type = 'expense' THEN 'Pengeluaran'
-          END as "Jenis",
-          amount as "Jumlah",
-          category as "Kategori",
-          description as "Deskripsi",
-          created_at as "Dibuat"
-        FROM transactions 
-        WHERE user_id = $1
-      `
-
-      const params = [user.id]
-      let paramIndex = 2
-
-      if (startDate) {
-        transactionQuery += ` AND date >= $${paramIndex}`
-        params.push(startDate)
-        paramIndex++
-      }
-
-      if (endDate) {
-        transactionQuery += ` AND date <= $${paramIndex}`
-        params.push(endDate)
-        paramIndex++
-      }
-
-      transactionQuery += " ORDER BY date DESC, created_at DESC"
-
-      console.log("[v0] Executing transaction query:", transactionQuery)
-      console.log("[v0] Query parameters:", params)
-
-      const transactionResult = await sql.unsafe(transactionQuery, params)
-      console.log("[v0] Transaction query result:", transactionResult)
-      console.log("[v0] Is result array?", Array.isArray(transactionResult))
-      console.log("[v0] Result length:", transactionResult?.length)
-
-      const transactions = Array.isArray(transactionResult) ? transactionResult : []
-
-      if (transactions.length === 0) {
-        console.log("[v0] No transactions found for user:", user.id)
-      }
-
-      const transactionData = transactions.map((t: any) => ({
-        Tanggal: new Date(t.Tanggal).toLocaleDateString("id-ID", {
-          weekday: "short",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
-        Jenis: t.Jenis,
-        Jumlah: formatCurrency(Number(t.Jumlah)),
-        Kategori: t.Kategori,
-        Deskripsi: t.Deskripsi,
-        Dibuat: new Date(t.Dibuat).toLocaleString("id-ID", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      }))
-
-      let transactionSheet
-      if (transactionData.length > 0) {
-        transactionSheet = XLSX.utils.json_to_sheet(transactionData)
-      } else {
-        // Create empty sheet with headers and no data message
-        const emptyData = [
-          {
-            Tanggal: "Tidak ada data transaksi",
-            Jenis: "",
-            Jumlah: "",
-            Kategori: "",
-            Deskripsi: "",
-            Dibuat: "",
-          },
-        ]
-        transactionSheet = XLSX.utils.json_to_sheet(emptyData)
-      }
-
-      transactionSheet["!cols"] = [
-        { width: 18 }, // Tanggal
-        { width: 14 }, // Jenis
-        { width: 20 }, // Jumlah
-        { width: 18 }, // Kategori
-        { width: 35 }, // Deskripsi
-        { width: 22 }, // Dibuat
-      ]
-
-      // Apply header styling
-      if (transactionData.length > 0) {
-        applyHeaderStyle(transactionSheet, `A1:F1`)
-
-        // Add alternating row colors
-        for (let i = 1; i <= transactionData.length; i++) {
-          const rowColor = i % 2 === 0 ? "F8FAFC" : "FFFFFF"
-          for (let col = 0; col < 6; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: i, c: col })
-            if (transactionSheet[cellAddress]) {
-              transactionSheet[cellAddress].s = {
-                fill: { fgColor: { rgb: rowColor } },
-                border: {
-                  top: { style: "thin", color: { rgb: "E2E8F0" } },
-                  bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                  left: { style: "thin", color: { rgb: "E2E8F0" } },
-                  right: { style: "thin", color: { rgb: "E2E8F0" } },
-                },
-              }
-            }
-          }
-        }
-      }
-
-      XLSX.utils.book_append_sheet(workbook, transactionSheet, "Transaksi")
-    }
-
-    // Export Debts
-    if (includeDebts) {
-      const debtResult = await sql`
-        SELECT 
-          creditor_name as "Kreditor",
-          amount as "Jumlah Total",
-          remaining_amount as "Sisa Hutang",
-          CASE 
-            WHEN is_paid THEN 'Lunas'
-            ELSE 'Belum Lunas'
-          END as "Status",
-          due_date as "Jatuh Tempo",
-          description as "Deskripsi",
-          created_at as "Dibuat"
-        FROM debts 
-        WHERE user_id = ${user.id}
-        ORDER BY is_paid ASC, due_date ASC NULLS LAST, created_at DESC
-      `
-      const debts = Array.isArray(debtResult) ? debtResult : []
-
-      const debtData = debts.map((d: any) => ({
-        Kreditor: d.Kreditor,
-        "Jumlah Total": formatCurrency(Number(d["Jumlah Total"])),
-        "Sisa Hutang": formatCurrency(Number(d["Sisa Hutang"])),
-        Status: d.Status,
-        "Jatuh Tempo": d["Jatuh Tempo"]
-          ? new Date(d["Jatuh Tempo"]).toLocaleDateString("id-ID", {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "-",
-        Deskripsi: d.Deskripsi,
-        Dibuat: new Date(d.Dibuat).toLocaleString("id-ID", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      }))
-
-      const debtSheet = XLSX.utils.json_to_sheet(debtData)
-
-      debtSheet["!cols"] = [
-        { width: 22 }, // Kreditor
-        { width: 20 }, // Jumlah Total
-        { width: 20 }, // Sisa Hutang
-        { width: 14 }, // Status
-        { width: 18 }, // Jatuh Tempo
-        { width: 35 }, // Deskripsi
-        { width: 22 }, // Dibuat
-      ]
-
-      // Apply styling
-      if (debtData.length > 0) {
-        applyHeaderStyle(debtSheet, `A1:G1`)
-
-        for (let i = 1; i <= debtData.length; i++) {
-          const rowColor = i % 2 === 0 ? "F8FAFC" : "FFFFFF"
-          for (let col = 0; col < 7; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: i, c: col })
-            if (debtSheet[cellAddress]) {
-              debtSheet[cellAddress].s = {
-                fill: { fgColor: { rgb: rowColor } },
-                border: {
-                  top: { style: "thin", color: { rgb: "E2E8F0" } },
-                  bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                  left: { style: "thin", color: { rgb: "E2E8F0" } },
-                  right: { style: "thin", color: { rgb: "E2E8F0" } },
-                },
-              }
-            }
-          }
-        }
-      }
-
-      XLSX.utils.book_append_sheet(workbook, debtSheet, "Hutang")
-    }
-
-    // Export Savings Goals
-    if (includeSavings) {
-      const savingsResult = await sql`
-        SELECT 
-          goal_name as "Nama Target",
-          target_amount as "Jumlah Target",
-          current_amount as "Terkumpul",
-          ROUND((current_amount / target_amount * 100)::numeric, 2) as "Progress (%)",
-          target_date as "Target Tanggal",
-          description as "Deskripsi",
-          created_at as "Dibuat"
-        FROM savings_goals 
-        WHERE user_id = ${user.id}
-        ORDER BY created_at DESC
-      `
-      const savings = Array.isArray(savingsResult) ? savingsResult : []
-
-      const savingsData = savings.map((s: any) => ({
-        "Nama Target": s["Nama Target"],
-        "Jumlah Target": formatCurrency(Number(s["Jumlah Target"])),
-        Terkumpul: formatCurrency(Number(s.Terkumpul)),
-        "Progress (%)": `${Number(s["Progress (%)"])}%`,
-        "Target Tanggal": s["Target Tanggal"]
-          ? new Date(s["Target Tanggal"]).toLocaleDateString("id-ID", {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "-",
-        Deskripsi: s.Deskripsi,
-        Dibuat: new Date(s.Dibuat).toLocaleString("id-ID", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      }))
-
-      const savingsSheet = XLSX.utils.json_to_sheet(savingsData)
-
-      savingsSheet["!cols"] = [
-        { width: 25 }, // Nama Target
-        { width: 20 }, // Jumlah Target
-        { width: 20 }, // Terkumpul
-        { width: 14 }, // Progress
-        { width: 18 }, // Target Tanggal
-        { width: 35 }, // Deskripsi
-        { width: 22 }, // Dibuat
-      ]
-
-      // Apply styling
-      if (savingsData.length > 0) {
-        applyHeaderStyle(savingsSheet, `A1:G1`)
-
-        for (let i = 1; i <= savingsData.length; i++) {
-          const rowColor = i % 2 === 0 ? "F8FAFC" : "FFFFFF"
-          for (let col = 0; col < 7; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: i, c: col })
-            if (savingsSheet[cellAddress]) {
-              savingsSheet[cellAddress].s = {
-                fill: { fgColor: { rgb: rowColor } },
-                border: {
-                  top: { style: "thin", color: { rgb: "E2E8F0" } },
-                  bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                  left: { style: "thin", color: { rgb: "E2E8F0" } },
-                  right: { style: "thin", color: { rgb: "E2E8F0" } },
-                },
-              }
-            }
-          }
-        }
-      }
-
-      XLSX.utils.book_append_sheet(workbook, savingsSheet, "Tabungan")
-    }
+    // --- 1. Summary Sheet with Visuals ---
+    const totalIncome = allTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
+    const totalExpenses = allTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0);
+    const totalRemainingDebt = allDebts.reduce((sum, d) => sum + Number(d.remaining_amount), 0);
+    const totalSaved = allSavings.reduce((sum, s) => sum + Number(s.current_amount), 0);
+    const totalTarget = allSavings.reduce((sum, s) => sum + Number(s.target_amount), 0);
+    
+    const expenseRatio = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
+    const savingsRatio = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
+    const createProgressBar = (percentage: number) => {
+        const filledBlocks = Math.round(percentage / 10);
+        const emptyBlocks = 10 - filledBlocks;
+        return `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${percentage.toFixed(1)}%`;
+    };
 
     const summaryData = [
-      { Keterangan: "LAPORAN KEUANGAN DOMPETKU", Nilai: "" },
-      { Keterangan: "", Nilai: "" },
-      { Keterangan: "Informasi Pengguna:", Nilai: "" },
-      { Keterangan: "Nama Pengguna", Nilai: user.name },
-      { Keterangan: "Email", Nilai: user.email },
-      {
-        Keterangan: "Tanggal Export",
-        Nilai: new Date().toLocaleString("id-ID", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      { Keterangan: "", Nilai: "" },
-      { Keterangan: "Filter Periode:", Nilai: "" },
-      {
-        Keterangan: "Dari Tanggal",
-        Nilai: startDate
-          ? new Date(startDate).toLocaleDateString("id-ID", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })
-          : "Semua data",
-      },
-      {
-        Keterangan: "Sampai Tanggal",
-        Nilai: endDate
-          ? new Date(endDate).toLocaleDateString("id-ID", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })
-          : "Semua data",
-      },
-      { Keterangan: "", Nilai: "" },
-      { Keterangan: "Data yang Di-export:", Nilai: "" },
-      { Keterangan: "✓ Transaksi", Nilai: includeTransactions ? "Ya" : "Tidak" },
-      { Keterangan: "✓ Hutang", Nilai: includeDebts ? "Ya" : "Tidak" },
-      { Keterangan: "✓ Tabungan", Nilai: includeSavings ? "Ya" : "Tidak" },
-    ]
-
-    const summarySheet = XLSX.utils.json_to_sheet(summaryData)
-    summarySheet["!cols"] = [{ width: 25 }, { width: 40 }]
-
-    // Style the summary sheet
-    for (let i = 0; i < summaryData.length; i++) {
-      const keteranganCell = XLSX.utils.encode_cell({ r: i, c: 0 })
-      const nilaiCell = XLSX.utils.encode_cell({ r: i, c: 1 })
-
-      if (i === 0) {
-        // Title row
-        if (summarySheet[keteranganCell]) {
-          summarySheet[keteranganCell].s = {
-            font: { bold: true, size: 16, color: { rgb: "1F2937" } },
-            alignment: { horizontal: "center" },
-            fill: { fgColor: { rgb: "EFF6FF" } },
-          }
+        [`RINGKASAN KEUANGAN - ${user.name}`],
+        [],
+        ["Ringkasan Transaksi"],
+        ["Total Pemasukan", totalIncome],
+        ["Total Pengeluaran", totalExpenses],
+        ["Saldo", totalIncome - totalExpenses],
+        ["Rasio Pengeluaran", createProgressBar(expenseRatio)],
+        [],
+        ["Ringkasan Hutang"],
+        ["Total Sisa Hutang", totalRemainingDebt],
+        ["Hutang Lunas", `${allDebts.filter(d => d.is_paid).length} dari ${allDebts.length}`],
+        [],
+        ["Ringkasan Tabungan"],
+        ["Total Terkumpul", totalSaved],
+        ["Total Target", totalTarget],
+        ["Progress Tabungan", createProgressBar(savingsRatio)],
+    ];
+    
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    summarySheet['!cols'] = [{ width: 30 }, { width: 30 }];
+    
+    mergeAndStyle(summarySheet, 0, 0, 1, `RINGKASAN KEUANGAN - ${user.name}`, titleStyle);
+    mergeAndStyle(summarySheet, 2, 0, 1, "Ringkasan Transaksi", sectionTitleStyle);
+    mergeAndStyle(summarySheet, 8, 0, 1, "Ringkasan Hutang", sectionTitleStyle);
+    mergeAndStyle(summarySheet, 12, 0, 1, "Ringkasan Tabungan", sectionTitleStyle);
+    
+    // Format currency
+    [3, 4, 5, 9, 13, 14].forEach(r => {
+        const cell = summarySheet[XLSX.utils.encode_cell({r, c:1})];
+        if(cell && typeof cell.v === 'number') {
+            cell.z = currencyFormat;
         }
-      } else if (summaryData[i].Keterangan.includes(":")) {
-        // Section headers
-        if (summarySheet[keteranganCell]) {
-          summarySheet[keteranganCell].s = {
-            font: { bold: true, color: { rgb: "374151" } },
-            fill: { fgColor: { rgb: "F3F4F6" } },
-          }
-        }
-      }
+    });
+
+    XLSX.utils.book_append_sheet(workbook, summarySheet, "Ringkasan");
+
+
+    // --- 2. Transactions Sheet ---
+    if (includeTransactions) {
+      const incomeData = allTransactions
+        .filter((t) => t.type === 'income')
+        .map((t) => [formatDate(t.date), t.category, t.description, Number(t.amount)]);
+      
+      const expenseData = allTransactions
+        .filter((t) => t.type === 'expense')
+        .map((t) => [formatDate(t.date), t.category, t.description, Number(t.amount)]);
+
+      const transactionHeaders = ["Tanggal", "Kategori", "Deskripsi", "Jumlah"];
+      
+      let transactionSheetData: any[][] = [
+        [`LAPORAN TRANSAKSI - ${user.name}`],
+        [],
+        ["PEMASUKAN"],
+        transactionHeaders,
+        ...incomeData,
+        ["", "", "Total Pemasukan", totalIncome],
+        [],
+        ["PENGELUARAN"],
+        transactionHeaders,
+        ...expenseData,
+        ["", "", "Total Pengeluaran", totalExpenses],
+      ];
+      
+      const transactionSheet = XLSX.utils.aoa_to_sheet(transactionSheetData);
+      transactionSheet['!cols'] = [{ width: 15 }, { width: 25 }, { width: 40 }, { width: 20 }];
+
+      mergeAndStyle(transactionSheet, 0, 0, 3, `LAPORAN TRANSAKSI - ${user.name}`, titleStyle);
+      mergeAndStyle(transactionSheet, 2, 0, 3, "PEMASUKAN", sectionTitleStyle);
+      applyStyle(transactionSheet, {s: {r: 3, c: 0}, e: {r: 3, c: 3}}, headerStyle);
+      applyStyle(transactionSheet, {s: {r: 4 + incomeData.length, c: 0}, e: {r: 4 + incomeData.length, c: 3}}, totalStyle);
+      
+      const expenseStartRow = 7 + incomeData.length;
+      mergeAndStyle(transactionSheet, expenseStartRow, 0, 3, "PENGELUARAN", sectionTitleStyle);
+      applyStyle(transactionSheet, {s: {r: expenseStartRow + 1, c: 0}, e: {r: expenseStartRow + 1, c: 3}}, headerStyle);
+      applyStyle(transactionSheet, {s: {r: expenseStartRow + 2 + expenseData.length, c: 0}, e: {r: expenseStartRow + 2 + expenseData.length, c: 3}}, totalStyle);
+      
+      // Format currency columns
+      incomeData.forEach((_, i) => {
+          const row = 4 + i;
+          const cell = transactionSheet[XLSX.utils.encode_cell({r:row, c:3})];
+          if(cell) cell.z = currencyFormat;
+      });
+      expenseData.forEach((_, i) => {
+          const row = expenseStartRow + 2 + i;
+          const cell = transactionSheet[XLSX.utils.encode_cell({r:row, c:3})];
+          if(cell) cell.z = currencyFormat;
+      });
+
+      const totalIncomeCell = transactionSheet[XLSX.utils.encode_cell({r: 4 + incomeData.length, c: 3})];
+      if(totalIncomeCell) totalIncomeCell.z = currencyFormat;
+      
+      const totalExpenseCell = transactionSheet[XLSX.utils.encode_cell({r: expenseStartRow + 2 + expenseData.length, c: 3})];
+      if(totalExpenseCell) totalExpenseCell.z = currencyFormat;
+      
+      XLSX.utils.book_append_sheet(workbook, transactionSheet, "Transaksi");
     }
 
-    XLSX.utils.book_append_sheet(workbook, summarySheet, "Ringkasan")
+    // --- 3. Debts & Savings Sheets ---
+    if (includeDebts) {
+        const data = allDebts.map((d: any) => ({
+            Kreditor: d.creditor_name, "Jumlah Total": Number(d.amount), "Sisa Hutang": Number(d.remaining_amount),
+            Status: d.is_paid ? 'Lunas' : 'Belum Lunas', "Jatuh Tempo": formatDate(d.due_date), Deskripsi: d.description
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        ws['!cols'] = [{ width: 25 }, { width: 20 }, { width: 20 }, { width: 15 }, { width: 15 }, { width: 40 }];
+        applyStyle(ws, { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, headerStyle);
+        data.forEach((_, index) => {
+            const row = index + 1;
+            const cell1 = ws[XLSX.utils.encode_cell({r:row, c:1})];
+            if(cell1) cell1.z = currencyFormat;
+            const cell2 = ws[XLSX.utils.encode_cell({r:row, c:2})];
+            if(cell2) cell2.z = currencyFormat;
+        });
+        XLSX.utils.book_append_sheet(workbook, ws, "Hutang");
+    }
 
-    // Generate Excel file
+    if (includeSavings) {
+        const data = allSavings.map((s: any) => ({
+            "Nama Target": s.goal_name, "Jumlah Target": Number(s.target_amount), Terkumpul: Number(s.current_amount),
+            "Progress (%)": totalTarget > 0 ? `${(Number(s.current_amount) / Number(s.target_amount) * 100).toFixed(1)}%` : "N/A",
+            "Target Tanggal": formatDate(s.target_date), Deskripsi: s.description
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        ws['!cols'] = [{ width: 25 }, { width: 20 }, { width: 20 }, { width: 15 }, { width: 15 }, { width: 40 }];
+        applyStyle(ws, { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, headerStyle);
+        data.forEach((_, index) => {
+             const row = index + 1;
+            const cell1 = ws[XLSX.utils.encode_cell({r:row, c:1})];
+            if(cell1) cell1.z = currencyFormat;
+            const cell2 = ws[XLSX.utils.encode_cell({r:row, c:2})];
+            if(cell2) cell2.z = currencyFormat;
+        });
+        XLSX.utils.book_append_sheet(workbook, ws, "Tabungan");
+    }
+    
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" })
-
-    const timestamp = new Date().toISOString().split("T")[0]
-    const filename = `laporan-keuangan-${user.name.replace(/\s+/g, "-").toLowerCase()}-${timestamp}.xlsx`
+    const filename = `laporan-keuangan-dompetku-${new Date().toISOString().split("T")[0]}.xlsx`
 
     return new NextResponse(excelBuffer, {
       headers: {
@@ -429,3 +239,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Terjadi kesalahan saat membuat export" }, { status: 500 })
   }
 }
+
