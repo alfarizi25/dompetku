@@ -1,14 +1,59 @@
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth"
 import { sql } from "@/lib/db"
+import type { Transaction } from "@/lib/db"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { RecentTransactions } from "@/components/dashboard/recent-transactions"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { FinancialOverview } from "@/components/dashboard/financial-overview"
 import { TransactionCharts } from "@/components/dashboard/transaction-charts"
+import { SmartInsights } from "@/components/dashboard/smart-insights"
 
-async function getDashboardData(userId: string) {
+// Define interfaces for the data shapes
+interface StatsData {
+  total_income: number;
+  total_expenses: number;
+  income_count: number;
+  expense_count: number;
+}
+
+interface DebtsData {
+  total_debts: number;
+  total_debt_amount: number;
+  unpaid_debts: number;
+}
+
+interface SavingsData {
+    total_goals: number;
+    total_target: number;
+    total_saved: number;
+}
+
+interface MonthlyData {
+    month: string;
+    income: number;
+    expense: number;
+    balance: number;
+}
+
+interface CategoryData {
+    category: string;
+    amount: number;
+    count: number;
+}
+
+interface DashboardData {
+  transactions: Transaction[];
+  stats: StatsData;
+  debts: DebtsData;
+  savings: SavingsData;
+  monthlyData: MonthlyData[];
+  categoryData: CategoryData[];
+}
+
+
+async function getDashboardData(userId: string): Promise<DashboardData> {
   // Get recent transactions
   const transactions = await sql`
     SELECT * FROM transactions 
@@ -77,12 +122,12 @@ async function getDashboardData(userId: string) {
   `
 
   return {
-    transactions,
-    stats: stats[0],
-    debts: debts[0],
-    savings: savings[0],
-    monthlyData,
-    categoryData,
+    transactions: transactions as Transaction[],
+    stats: stats[0] as StatsData,
+    debts: debts[0] as DebtsData,
+    savings: savings[0] as SavingsData,
+    monthlyData: monthlyData as MonthlyData[],
+    categoryData: categoryData as CategoryData[],
   }
 }
 
@@ -120,8 +165,9 @@ export default async function DashboardPage() {
               <RecentTransactions transactions={data.transactions} />
             </div>
 
-            {/* Right Column - Quick Actions */}
-            <div className="lg:col-span-1">
+            {/* Right Column - Smart Insights & Quick Actions */}
+            <div className="lg:col-span-1 space-y-8">
+              <SmartInsights />
               <QuickActions />
             </div>
           </div>
@@ -130,3 +176,4 @@ export default async function DashboardPage() {
     </div>
   )
 }
+
