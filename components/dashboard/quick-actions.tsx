@@ -55,6 +55,7 @@ export function QuickActions() {
           const Icon = action.icon
           return (
             <Link key={action.title} href={action.href}>
+              {/* Memastikan tombol tidak menyebabkan overflow */}
               <Button
                 variant="ghost"
                 className="w-full justify-start h-auto p-4 glass hover:glass-strong transition-all duration-200"
@@ -65,9 +66,9 @@ export function QuickActions() {
                   >
                     <Icon className="h-5 w-5 text-white" />
                   </div>
-                  <div className="text-left">
-                    <p className="font-medium text-gray-900">{action.title}</p>
-                    <p className="text-sm text-gray-600">{action.description}</p>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 break-words">{action.title}</p>
+                    <p className="text-sm text-gray-600 break-words">{action.description}</p>
                   </div>
                 </div>
               </Button>

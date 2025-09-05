@@ -29,14 +29,14 @@ export function FinancialOverview({ stats }: FinancialOverviewProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Income vs Expenses */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-0">
           <div className="space-y-2 min-w-0">
-            <div className="flex items-center justify-between min-w-0">
+            <div className="flex flex-wrap items-center justify-between min-w-0 gap-x-2">
               <div className="flex items-center gap-2 flex-shrink-0">
                 <TrendingUp className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Pemasukan</span>
               </div>
-              <span className="text-sm font-bold text-green-600 truncate ml-2">
+              <span className="text-sm font-bold text-green-600">
                 Rp {totalIncome.toLocaleString("id-ID")}
               </span>
             </div>
@@ -44,12 +44,12 @@ export function FinancialOverview({ stats }: FinancialOverviewProps) {
           </div>
 
           <div className="space-y-2 min-w-0">
-            <div className="flex items-center justify-between min-w-0">
+            <div className="flex flex-wrap items-center justify-between min-w-0 gap-x-2">
               <div className="flex items-center gap-2 flex-shrink-0">
                 <TrendingDown className="h-4 w-4 text-red-500" />
                 <span className="text-sm font-medium">Pengeluaran</span>
               </div>
-              <span className="text-sm font-bold text-red-600 truncate ml-2">
+              <span className="text-sm font-bold text-red-600">
                 Rp {totalExpenses.toLocaleString("id-ID")}
               </span>
             </div>
@@ -62,17 +62,17 @@ export function FinancialOverview({ stats }: FinancialOverviewProps) {
         <div
           className={`p-4 rounded-lg min-w-0 ${balance >= 0 ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
         >
-          <div className="flex items-center justify-between min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between min-w-0">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-600">Saldo Bulan Ini</p>
               <p
-                className={`text-xl sm:text-2xl font-bold truncate ${balance >= 0 ? "text-green-600" : "text-red-600"}`}
+                className={`text-xl sm:text-2xl font-bold break-words ${balance >= 0 ? "text-green-600" : "text-red-600"}`}
               >
                 Rp {Math.abs(balance).toLocaleString("id-ID")}
               </p>
             </div>
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ml-3 ${balance >= 0 ? "bg-green-500" : "bg-red-500"}`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 mt-2 sm:mt-0 sm:ml-3 ${balance >= 0 ? "bg-green-500" : "bg-red-500"}`}
             >
               {balance >= 0 ? (
                 <TrendingUp className="h-6 w-6 text-white" />
@@ -87,7 +87,7 @@ export function FinancialOverview({ stats }: FinancialOverviewProps) {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
           <div className="text-center min-w-0">
             <p className="text-2xl font-bold text-gray-900">{stats.income_count}</p>
             <p className="text-sm text-gray-600">Transaksi Masuk</p>
@@ -101,3 +101,4 @@ export function FinancialOverview({ stats }: FinancialOverviewProps) {
     </Card>
   )
 }
+
