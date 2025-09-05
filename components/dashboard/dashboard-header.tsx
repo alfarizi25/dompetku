@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,8 +24,16 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const router = useRouter()
-  const pathname = usePathname()
+  const [pathname, setPathname] = useState("")
+
+  // Fallback for environments where usePathname might not be available
+  const nextPathname = usePathname ? usePathname() : null
+  const router = useRouter ? useRouter() : null
+
+  useEffect(() => {
+    setPathname(nextPathname || window.location.pathname)
+  }, [nextPathname])
+
 
   const handleLogout = async () => {
     try {
@@ -36,7 +43,11 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
       if (response.ok) {
         console.log("[v0] Logout successful, redirecting...")
-        router.push("/")
+        if (router) {
+          router.push("/")
+        } else {
+          window.location.href = "/"
+        }
       } else {
         console.error("[v0] Logout failed:", response.status)
         alert("Gagal logout. Silakan coba lagi.")
@@ -58,16 +69,16 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   const isActive = (href: string) => pathname === href
 
   return (
-    <header className="backdrop-blur-md bg-white/10 border-b border-white/20 sticky top-0 z-50">
+    <header className="bg-card border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link
+            <a
               href="/dashboard"
               className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover-lift transition-all duration-200"
             >
               DompetKu
-            </Link>
+            </a>
           </div>
 
           <nav className="hidden md:flex space-x-1">
@@ -75,19 +86,19 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               const Icon = item.icon
               const active = isActive(item.href)
               return (
-                <Link
+                <a
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 focus-ring",
+                    "flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200",
                     active
-                      ? "bg-white/20 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-medium"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-white/10",
+                      ? "bg-secondary text-secondary-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent",
                   )}
                 >
                   <Icon className="h-4 w-4" />
                   <span className="hidden lg:inline text-sm xl:text-base">{item.name}</span>
-                </Link>
+                </a>
               )
             })}
           </nav>
@@ -98,7 +109,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="hidden md:flex items-center gap-2 bg-white/10 border-white/20 text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200"
+              className="hidden md:flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
               Keluar
@@ -108,7 +119,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-8 w-8 rounded-full hover:bg-white/10 focus:ring-2 focus:ring-blue-500"
+                  className="relative h-8 w-8 rounded-full"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium">
@@ -118,7 +129,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-56 bg-white/95 backdrop-blur-sm border border-white/20 shadow-lg rounded-md"
+                className="w-56"
                 align="end"
               >
                 <div className="flex items-center justify-start gap-2 p-3">
@@ -128,14 +139,14 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer hover:bg-gray-50">
+                <DropdownMenuItem className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   <span>Profil</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="cursor-pointer hover:bg-red-50 text-red-600 focus:text-red-600 focus:bg-red-50 md:hidden"
+                  className="cursor-pointer text-destructive focus:text-destructive md:hidden"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Keluar</span>
@@ -145,7 +156,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
             <Button
               variant="ghost"
-              className="md:hidden button-press focus-ring"
+              className="md:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -154,27 +165,27 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-white/20 bg-white/5 backdrop-blur-sm mobile-menu-enter">
+          <div className="md:hidden py-4 border-t bg-card">
             <nav className="space-y-1 max-h-96 overflow-y-auto">
               {navigation.map((item, index) => {
                 const Icon = item.icon
                 const active = isActive(item.href)
                 return (
-                  <Link
+                  <a
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 focus-ring animate-slide-in-left",
+                      "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
                       active
-                        ? "bg-white/20 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-medium"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-white/10",
+                        ? "bg-secondary text-secondary-foreground font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent",
                     )}
                     style={{ animationDelay: `${index * 0.1}s` }}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     <span className="truncate">{item.name}</span>
-                  </Link>
+                  </a>
                 )
               })}
               <Button
@@ -183,7 +194,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                   setIsMobileMenuOpen(false)
                 }}
                 variant="ghost"
-                className="w-full justify-start gap-3 px-3 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 animate-slide-in-left"
+                className="w-full justify-start gap-3 px-3 py-3 text-destructive hover:text-destructive hover:bg-destructive/10"
                 style={{ animationDelay: `${navigation.length * 0.1}s` }}
               >
                 <LogOut className="h-5 w-5 flex-shrink-0" />
@@ -196,3 +207,4 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
     </header>
   )
 }
+
