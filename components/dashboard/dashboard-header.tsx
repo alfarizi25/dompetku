@@ -92,12 +92,14 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200",
                     active
-                      ? "bg-secondary text-secondary-foreground font-medium"
+                      ? "bg-secondary font-medium" // Background untuk item aktif
                       : "text-muted-foreground hover:text-foreground hover:bg-accent",
                   )}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden lg:inline text-sm xl:text-base">{item.name}</span>
+                  <Icon className={cn("h-4 w-4", active ? "bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" : "")}/>
+                  <span className={cn("hidden lg:inline text-sm xl:text-base", active ? "bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" : "")}>
+                    {item.name}
+                  </span>
                 </a>
               )
             })}
@@ -177,14 +179,16 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                     className={cn(
                       "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
                       active
-                        ? "bg-secondary text-secondary-foreground font-medium"
+                        ? "bg-secondary font-medium"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent",
                     )}
                     style={{ animationDelay: `${index * 0.1}s` }}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <span className="truncate">{item.name}</span>
+                    <Icon className={cn("h-5 w-5 flex-shrink-0", active ? "bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" : "")}/>
+                    <span className={cn("truncate", active ? "bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" : "")}>
+                      {item.name}
+                    </span>
                   </a>
                 )
               })}
@@ -207,4 +211,3 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
     </header>
   )
 }
-

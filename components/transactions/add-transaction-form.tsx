@@ -85,7 +85,7 @@ export function AddTransactionForm() {
             <SelectTrigger className="glass border-white/30 focus:border-blue-300 focus-ring">
               <SelectValue placeholder="Pilih jenis" />
             </SelectTrigger>
-            <SelectContent className="glass-card border-white/20">
+            <SelectContent>
               <SelectItem value="income">Pemasukan</SelectItem>
               <SelectItem value="expense">Pengeluaran</SelectItem>
             </SelectContent>
@@ -113,7 +113,7 @@ export function AddTransactionForm() {
             <SelectTrigger className="glass border-white/30 focus:border-blue-300 focus-ring">
               <SelectValue placeholder="Pilih kategori" />
             </SelectTrigger>
-            <SelectContent className="glass-card border-white/20">
+            <SelectContent>
               {categories[formData.type as keyof typeof categories].map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
